@@ -3,20 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Course Ranking Tool</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Class Assignment Optimizer</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const classData = [];
+      const studentData = [];
+      const preferences = [];
+
+      // Add class handler
+      document.getElementById("addClass").addEventListener("click", () => {
+        const className = document.getElementById("className").value;
+        const capacity = parseInt(document.getElementById("capacity").value);
+        if (className && capacity > 0) {
+          classData.push({ name: className, capacity });
+          updateClassList();
+        }
+      });
+
+      // Add student handler
+      document.getElementById("addStudent").addEventListener("click", () => {
+        const studentName = document.getElementById("studentName").value;
+        const preference = document.getElementById("preference").value.split(',').map(p => p.trim());
+        if (studentName && preference.length > 0) {
+          studentData.push({ name: studentName, preference });
+          updateStudentList();
+        }
+      });
+
+      // Update displayed class list
+      function updateClassList() {
+        const classList = document.getElementById("classList");
+        classList.innerHTML = classData.map(cls => `<li>${cls.name} (Capacity: ${cls.capacity})</li>`).join('');
+      }
+
+      // Update displayed student list
+      function updateStudentList() {
+        const studentList = document.getElementById("studentList");
+        studentList.innerHTML = studentData.map(stu => `<li>${stu.name}: [${stu.preference.join(", ")}]</li>`).join('');
+      }
+
+      // Run Optimization
+      document.getElementById("optimize").addEventListener("click", async () => {
+        const response = await fetch("http://localhost:5000/optimize", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ classes: classData, students: studentData })
+        });
+
+        const result = await response.json();
+        document.getElementById("result").innerText = JSON.stringify(result, null, 2);
+      });
+    });
+  </script>
 </head>
-<body>
-  <h1>Course Selection Dashboard</h1>
+<body class="bg-gray-100 min-h-screen p-4">
+  <div class="container mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Class Assignment Optimizer</h1>
 
-  <label for="available-classes">Select a Class:</label>
-  <select id="available-classes"></select>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <h2 class="text-xl font-semibold">Add Class</h2>
+        <input type="text" id="className" placeholder="Class Name" class="border p-2 w-full mb-2">
+        <input type="number" id="capacity" placeholder="Capacity" class="border p-2 w-full mb-2">
+        <button id="addClass" class="bg-blue-500 text-white px-4 py-2 rounded">Add Class</button>
 
-  <h2>Top 5 Ranked Classes</h2>
-  <ol id="ranked-classes"></ol>
+        <h3 class="text-lg font-semibold mt-4">Class List:</h3>
+        <ul id="classList" class="list-disc pl-5"></ul>
+      </div>
 
-  <button id="generate-rankings">Generate Rankings</button>
+      <div>
+        <h2 class="text-xl font-semibold">Add Student</h2>
+        <input type="text" id="studentName" placeholder="Student Name" class="border p-2 w-full mb-2">
+        <input type="text" id="preference" placeholder="Preferences (comma-separated)" class="border p-2 w-full mb-2">
+        <button id="addStudent" class="bg-green-500 text-white px-4 py-2 rounded">Add Student</button>
 
-  <script src="script.js"></script>
+        <h3 class="text-lg font-semibold mt-4">Student List:</h3>
+        <ul id="studentList" class="list-disc pl-5"></ul>
+      </div>
+    </div>
+
+    <button id="optimize" class="bg-purple-500 text-white px-4 py-2 rounded mt-4">Optimize Assignments</button>
+
+    <h2 class="text-xl font-semibold mt-4">Result:</h2>
+    <pre id="result" class="bg-gray-200 p-4"></pre>
+  </div>
 </body>
 </html>
