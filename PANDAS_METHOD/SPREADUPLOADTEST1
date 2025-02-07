@@ -1,0 +1,104 @@
+import pandas as pd
+from pulp import LpProblem, LpMinimize, LpVariable, lpSum, PULP_CBC_CMD
+from collections import defaultdict
+
+
+
+
+# Optimization function for TA assignment
+def optimize_schedule(student_file, class_file):
+    # Load Data
+    student_df = pd.read_excel(student_file)
+    class_df = pd.read_excel(class_file, names=["Class", "Capacity"])
+
+    print("Student Data Columns:", student_df.columns)
+    
+    for col in student_df.columns:
+        # Skip columns that do not follow expected patterns
+        if "[" not in col or "]" not in col:
+            print(f"Skipping column: '{col}'")
+            continue
+
+        # Extract class name inside brackets
+        try:
+            class_name = col.split("[")[1].strip("]")
+            print(f"Class name extracted: {class_name}")
+        except IndexError:
+            print(f"Skipping column due to format issue: '{col}'")
+
+
+
+    # Extract student preferences and availability
+    students = student_df["First Name"] + " " + student_df["Last Name"]
+    classes = class_df.set_index("Class")["Capacity"].to_dict()
+
+    # Build preferences and availability dictionaries
+    preferences = {}
+    availabilities = {}
+
+    for _, row in student_df.iterrows():
+        student_name = row["First Name"] + " " + row["Last Name"]
+        ranks = {}
+        available_classes = []
+
+        for col in student_df.columns[2:]:
+            if "Rank" in col and pd.notna(row[col]):
+                # Extract class name inside brackets if present
+                if "[" in col and "]" in col:
+                    class_name = col.split("[")[1].strip("]")
+                else:
+                    class_name = col.replace("Rank ", "").strip()
+                ranks[class_name] = int(row[col])
+            elif "Available" in col and row[col] == "Available":
+                if "[" in col and "]" in col:
+                    class_name = col.split("[")[1].strip("]")
+                else:
+                    class_name = col.replace("Available ", "").strip()
+                available_classes.append(class_name)
+
+
+        preferences[student_name] = ranks
+        availabilities[student_name] = available_classes
+
+    # Set high dissatisfaction value for unavailable classes
+    max_dissatisfaction = 10
+    rankings = {}
+    for student, ranks in preferences.items():
+        for class_name in classes:
+            if class_name in ranks:
+                rankings[(student, class_name)] = ranks[class_name]
+            elif class_name in availabilities.get(student, []):
+                rankings[(student, class_name)] = max_dissatisfaction
+            else:
+                rankings[(student, class_name)] = float('inf')
+
+    # Optimization problem setup
+    problem = LpProblem("TAAssignment", LpMinimize)
+    x = LpVariable.dicts("assign", [(s, c) for s in students for c in classes], cat="Binary")
+
+    # Objective function
+    problem += (
+        lpSum(rankings[(s, c)] * x[(s, c)] for s in students for c in classes if rankings[(s, c)] != float('inf'))
+    )
+
+    # Constraints
+    for s in students:
+        problem += lpSum(x[(s, c)] for c in classes if rankings[(s, c)] != float('inf')) == 1, f"OneClassPerStudent_{s}"
+    for c in classes:
+        problem += lpSum(x[(s, c)] for s in students if rankings[(s, c)] != float('inf')) <= classes[c], f"ClassCapacity_{c}"
+
+    # Solve the problem
+    problem.solve()
+
+    # Output results
+    assignments = {s: c for s in students for c in classes if x[(s, c)].value() == 1}
+    for student, assigned_class in assignments.items():
+        print(f"{student} assigned to {assigned_class}")
+
+    return assignments
+
+# Example function calls
+student_file = r"C:\Users\joshu\Python\Jaswal\students.xlsx"
+class_file = r"C:\Users\joshu\Python\Jaswal\classes.xlsx"
+
+optimize_schedule(student_file, class_file)
