@@ -1,13 +1,12 @@
 1. Creating Spreadsheets- The Program Requires 2 spreadsheets, one containing the Class names and number of spots, and the other containing the student names, ranks, and availability (will be attached to form)
-  1. Class Spread
-    - First column will be called ‘Class’ and second column will be called ‘Spots’ (needs to be exact for program)
-  2. Student spread - This spreadsheet will come from the form	
-  - Since it checks for column, the first name question must be called “First Name”, second name column “Last Name” and both should be short answer questions
+  Class Spread
+    First column will be called ‘Class’ and second column will be called ‘Spots’ (needs to be exact for program)
+  Student spread - This spreadsheet will come from the form	
+    Since it checks for column, the first name question must be called “First Name”, second name column “Last Name” and both should be short answer questions
     For the rankings, the question name should be “Rank”, and it should be a multiple choice grid, with rows as the class names, and columns as the ranks
-  - For availability, the class names must be exactly the same, and the question name should be “Available”, with the class names being rows, and Available being column 1, and not available being column 2. (the formatting should be the same as the Spring 2025 form)
-    The available section should look something like this
-  - Any other questions or grids should be fine, such as the number of years TAing, as long as those 3 steps are made for the form, and all the class names match up between the two spreadsheets, and the rank and available questions
-  3. Download both spreadsheets (the one linked in the form and the one made for classes) as .xlsx files
+    For availability, the class names must be exactly the same, and the question name should be “Available”, with the class names being rows, and Available being column 1, and not available being column 2. (the formatting should be the       same as the Spring 2025 form)
+    Any other questions or grids should be fine, such as the number of years TAing, as long as those 3 steps are made for the form, and all the class names match up between the two spreadsheets, and the rank and available questions
+  Download both spreadsheets (the one linked in the form and the one made for classes) as .xlsx files
 
 2. Download and UNZIP - to run the program, you need to download the folder (which contains CBC and the executable), and extract it
   Locate the Zip File:
